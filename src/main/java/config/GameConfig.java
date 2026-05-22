@@ -94,7 +94,6 @@ public class GameConfig {
         return c;
     }
 
-    // getters (sem setters — config é imutável após o load)
     public int getBoardSize()            { return boardSize; }
     public char getColStart()            { return colStart; }
     public char getColEnd()              { return colEnd; }
