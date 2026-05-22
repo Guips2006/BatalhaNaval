@@ -1,6 +1,3 @@
-// =========================================================
-// domain/Game.java
-// =========================================================
 package domain;
 
 import config.GameConfig;
@@ -17,21 +14,6 @@ import ui.TerminalUI;
 import validation.FleetValidator;
 import validation.ValidationResult;
 
-/**
- * Orquestrador da partida.
- *
- * Responsabilidades:
- *  - Inicializar jogadores e frotas.
- *  - Executar o loop de turnos.
- *  - Detectar fim de jogo.
- *  - Acumular o log da partida.
- *  - Delegar UI para TerminalUI, domínio para Player/Fleet/Board.
- *  - Nenhum System.out direto aqui — tudo passa por ui.
- *
- * Game NÃO conhece DatabaseManager nem MatchRepository diretamente;
- * quem persiste é a camada de persistência, chamada externamente após
- * {@link #run()} terminar com o log disponível via {@link #getLog()}.
- */
 public final class Game {
 
     private final GameConfig    config;
@@ -49,10 +31,6 @@ public final class Game {
     private final List<persistence.MoveRepository.MoveEntry> moveEntries = new ArrayList<>();
     private int moveCounter = 0;
 
-    // ------------------------------------------------------------------
-    // Construção
-    // ------------------------------------------------------------------
-
     public Game(GameConfig config, TerminalUI ui, Scanner scanner) {
         this.config    = config;
         this.ui        = ui;
@@ -60,13 +38,6 @@ public final class Game {
         this.validator = new FleetValidator(config);
     }
 
-    // ------------------------------------------------------------------
-    // Ponto de entrada principal
-    // ------------------------------------------------------------------
-
-    /**
-     * Executa o fluxo completo: escolha de modo, jogo ou replay/listagem.
-     */
     public void run() {
         ui.printWelcome(config.getGroupId() + " v" + getVersion());
 
@@ -79,10 +50,7 @@ public final class Game {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Modo PLAY
-    // ------------------------------------------------------------------
-
+    
     private void runPlayMode() {
         initPlayers();
         placeFleets();
@@ -97,10 +65,6 @@ public final class Game {
         humanFleet = Fleet.fromConfig(config);
         cpuFleet   = Fleet.fromConfig(config);
     }
-
-    // ------------------------------------------------------------------
-    // Posicionamento de frotas
-    // ------------------------------------------------------------------
 
     private void placeFleets() {
         // Humano
@@ -129,10 +93,6 @@ public final class Game {
         cpuFleet.markAllPlaced();
         log("CPU posicionou a frota.");
     }
-
-    // ------------------------------------------------------------------
-    // Loop de jogo
-    // ------------------------------------------------------------------
 
     private void gameLoop() {
         boolean playerTurn = true;
@@ -174,10 +134,7 @@ public final class Game {
         }
     }
 
-    /**
-     * Executa o turno do humano com menu de ações.
-     * @return true quando o turno foi concluído com um tiro válido
-     */
+    
     private boolean runHumanTurn() {
         ui.printInfo("\nSeu turno.");
         ui.printTurnMenu();
@@ -256,10 +213,6 @@ public final class Game {
         }
 }
 
-    // ------------------------------------------------------------------
-    // Pós-jogo
-    // ------------------------------------------------------------------
-
     private void postGame() {
         ui.printInfo("");
         ui.printInfo("Mostrar log completo? (s/N): ");
@@ -268,10 +221,6 @@ public final class Game {
             ui.printFullLog(log);
         }
     }
-
-    // ------------------------------------------------------------------
-    // Modo REPLAY
-    // ------------------------------------------------------------------
 
     private void runReplayMode() {
         ReplayService replay = new ReplayService(config, ui);
@@ -287,11 +236,6 @@ public final class Game {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Acesso ao log (para persistência externa)
-    // ------------------------------------------------------------------
-
-    /** Log completo da partida (imutável). Disponível após {@link #run()}. */
     public List<String> getLog() {
         return java.util.Collections.unmodifiableList(log);
     }
@@ -307,20 +251,14 @@ public final class Game {
     /** Jogador CPU (para persistência). */
     public CpuPlayer getCpu() { return cpu; }
 
-    // ------------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------------
-
     private void log(String entry) {
         log.add(entry);
     }
-    // Getter:
     public List<MoveRepository.MoveEntry> getMoveEntries() {
         return Collections.unmodifiableList(moveEntries);
     }
     
     private String getVersion() {
-        // GameConfig não expõe version diretamente; usa groupId como fallback
         return "1.0";
     }
 }
