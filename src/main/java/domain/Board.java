@@ -195,4 +195,9 @@ public class Board {
             Arrays.fill(row, value);
         }
     }
+
+    public int getShipId(int x, int y) {
+        validateCoordinates(x, y);
+        return shipId[y][x];
+    }
 }

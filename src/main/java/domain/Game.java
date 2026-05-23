@@ -162,7 +162,7 @@ public final class Game {
 
         int[] xy = ui.parseCoord(input);
         if (xy == null) {
-            ui.printError("Coordenada inválida.");
+           ui.printError("Coordenada inválida.");
             return false;
         }
 
@@ -171,10 +171,9 @@ public final class Game {
             return false;
         }
 
-        // Detecta afundamento ANTES do tiro (para comparar HP depois)
-        ShotResult result = human.getBoard().fireAt(cpu.getBoard(), xy[0], xy[1]);
+        ShotResult result = human.getShotsBoard().fireAt(cpu.getBoard(), xy[0], xy[1]);
 
-        // Sincroniza frota para detectar afundamento
+   
         Ship justSunk = cpuFleet.detectNewlySunk(cpu.getBoard());
         cpuFleet.syncFromBoard(cpu.getBoard());
 
@@ -182,10 +181,8 @@ public final class Game {
         String shipName = justSunk != null ? justSunk.getName() : null;
         ui.printShotResult(coord, result, shipName);
 
-        String logEntry = "Jogador " + result.name().toLowerCase()
-                + " em " + coord
-                + (justSunk != null ? " (afundou " + justSunk.getName() + ")" : "");
-        log(logEntry);
+        log("Jogador " + result.name().toLowerCase() + " em " + coord
+                + (justSunk != null ? " (afundou " + justSunk.getName() + ")" : ""));
 
         moveEntries.add(new MoveRepository.MoveEntry(++moveCounter, human.getName(), coord, result));
 

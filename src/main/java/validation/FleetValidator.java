@@ -68,31 +68,34 @@ public class FleetValidator {
     // ------------------------------------------------------------------
 
     private void checkAdjacency(Board board, List<String> errors) {
-        AdjacencyRule rule = config.getAdjacencyRule();
-        if (rule == AdjacencyRule.NONE) return; // sem restrição
+    AdjacencyRule rule = config.getAdjacencyRule();
+    if (rule == AdjacencyRule.NONE) return;
 
-        int n = board.getSize();
+    int n = board.getSize();
 
-        // Matriz auxiliar: 1 onde há navio ('S' ou 'X' antes de qualquer tiro)
-        boolean[][] ship = buildShipMatrix(board, n);
+    for (int y = 0; y < n; y++) {
+        for (int x = 0; x < n; x++) {
+            int id = board.getShipId(x, y);
+            if (id == -1) continue; // célula vazia
 
-        for (int y = 0; y < n; y++) {
-            for (int x = 0; x < n; x++) {
-                if (!ship[y][x]) continue;
+            int[][] dirs = rule == AdjacencyRule.ORTHO
+                ? new int[][]{{1,0},{-1,0},{0,1},{0,-1}}
+                : new int[][]{{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
 
-                boolean violation = rule == AdjacencyRule.ORTHO
-                        ? hasOrthogonalNeighbor(ship, x, y, n)
-                        : hasDiagonalOrOrthogonalNeighbor(ship, x, y, n);
-
-                if (violation) {
+            for (int[] d : dirs) {
+                int nx = x + d[0], ny = y + d[1];
+                if (nx < 0 || nx >= n || ny < 0 || ny >= n) continue;
+                int neighborId = board.getShipId(nx, ny);
+                if (neighborId != -1 && neighborId != id) {
                     errors.add(String.format(
                         "Violação de adjacência (%s) em %c%d.",
                         rule, (char)(config.getColStart() + x), y + 1));
-                    // Um erro por célula é suficiente — não continua iterando a mesma
+                    break; // um erro por célula é suficiente
                 }
             }
         }
     }
+}
 
     /**
      * Retorna true se a célula (x,y) tem algum vizinho ortogonal com navio
